@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Edit Product — {{ seller_product.base_product.name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h4 class="fw-bold"><i class="bi bi-pencil"></i> Edit — {{ seller_product.base_product.name }}</h4>
+    </div>
+    <div class="col-auto">
+        <a href="/seller/inventory/" class="btn btn-outline-secondary btn-sm">← Back</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="post" action="/seller/inventory/edit/{{ seller_product.id }}/">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Local Name <span class="text-muted">(optional)</span></label>
+                <input type="text" name="local_name" class="form-control" value="{{ seller_product.local_name }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+<h5 class="fw-bold mb-3">Variants</h5>
+{% for variant in seller_product.variants.all %}
+<div class="card mb-2">
+    <div class="card-body">
+        <form method="post" action="/seller/inventory/variant/update/{{ variant.id }}/">
+            {% csrf_token %}
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Unit</label>
+                    <select name="unit" class="form-select form-select-sm">
+                        {% for val, label in unit_choices %}
+                        <option value="{{ val }}" {% if variant.unit == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Qty per unit</label>
+                    <input type="number" name="quantity_per_unit" value="{{ variant.quantity_per_unit }}" class="form-control form-control-sm" min="1">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Price ₹</label>
+                    <input type="number" name="price" value="{{ variant.price }}" class="form-control form-control-sm" step="0.01">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Stock</label>
+                    <input type="number" name="stock" value="{{ variant.stock }}" class="form-control form-control-sm" min="0">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Custom unit</label>
+                    <input type="text" name="custom_unit" value="{{ variant.custom_unit }}" class="form-control form-control-sm" placeholder="e.g. 7 eggs">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<div class="card mt-3">
+    <div class="card-header bg-white fw-bold">Add New Variant</div>
+    <div class="card-body">
+        <form method="post" action="/seller/inventory/variant/add/{{ seller_product.id }}/">
+            {% csrf_token %}
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Unit</label>
+                    <select name="unit" class="form-select form-select-sm">
+                        {% for val, label in unit_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Qty per unit</label>
+                    <input type="number" name="quantity_per_unit" value="1" class="form-control form-control-sm" min="1">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Price ₹</label>
+                    <input type="number" name="price" class="form-control form-control-sm" step="0.01" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Stock</label>
+                    <input type="number" name="stock" value="0" class="form-control form-control-sm" min="0">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Custom unit</label>
+                    <input type="text" name="custom_unit" class="form-control form-control-sm" placeholder="e.g. 7 eggs">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success btn-sm w-100">Add</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

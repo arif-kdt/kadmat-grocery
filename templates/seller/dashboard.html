@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}Seller Dashboard — Kadmat Grocery{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h4 class="fw-bold">Welcome, {{ user.first_name }} 👋</h4>
+        <p class="text-muted"><i class="bi bi-shop"></i> {{ shop.name }} &nbsp;|&nbsp; {{ shop.location }}</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h3 class="fw-bold text-warning">{{ pending_count }}</h3>
+            <p class="text-muted mb-0">Pending Orders</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h3 class="fw-bold text-primary">{{ confirmed_count }}</h3>
+            <p class="text-muted mb-0">Confirmed</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h3 class="fw-bold" style="color:#9c27b0">{{ ready_count }}</h3>
+            <p class="text-muted mb-0">Ready for Pickup</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h3 class="fw-bold text-success">{{ collected_count }}</h3>
+            <p class="text-muted mb-0">Collected</p>
+        </div>
+    </div>
+</div>
+
+<h5 class="fw-bold mb-3">Pending Orders</h5>
+{% if pending_orders %}
+    {% for order in pending_orders %}
+    <div class="card mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Order #{{ order.id }} — {{ order.customer.get_full_name|default:order.customer.username }}</span>
+            <span class="text-muted small">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+        </div>
+        <div class="card-body">
+            <form method="post" action="/seller/orders/confirm/">
+                {% csrf_token %}
+                <input type="hidden" name="order_id" value="{{ order.id }}">
+                <table class="table table-sm mb-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Select</th>
+                            <th>Product</th>
+                            <th>Unit</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td><input type="checkbox" name="confirm_items" value="{{ item.id }}" checked></td>
+                            <td>{{ item.variant.seller_product.base_product.name }}</td>
+                            <td>{{ item.variant.get_unit_display_name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹{{ item.price_at_order }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-check-circle"></i> Confirm Selected Items
+                    </button>
+                    <a href="/seller/orders/cancel/{{ order.id }}/" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-x-circle"></i> Cancel Order
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info">No pending orders.</div>
+{% endif %}
+
+<h5 class="fw-bold mb-3 mt-4">Confirmed Orders</h5>
+{% if confirmed_orders %}
+    {% for order in confirmed_orders %}
+    <div class="card mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Order #{{ order.id }} — {{ order.customer.get_full_name|default:order.customer.username }}</span>
+            <span class="status-badge badge-confirmed">Confirmed</span>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm mb-3">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Unit</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>{{ item.variant.seller_product.base_product.name }}</td>
+                        <td>{{ item.variant.get_unit_display_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ item.price_at_order }}</td>
+                        <td>
+                            {% if item.is_confirmed %}
+                                <span class="badge bg-success">Confirmed</span>
+                            {% else %}
+                                <span class="badge bg-danger">Not available</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="/seller/orders/ready/{{ order.id }}/" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-box-seam"></i> Mark as Ready for Pickup
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info">No confirmed orders.</div>
+{% endif %}
+
+<h5 class="fw-bold mb-3 mt-4">Ready for Pickup</h5>
+{% if ready_orders %}
+    {% for order in ready_orders %}
+    <div class="card mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Order #{{ order.id }} — {{ order.customer.get_full_name|default:order.customer.username }}</span>
+            <span class="status-badge badge-ready">Ready</span>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Customer will collect from your shop.</p>
+            <a href="/seller/orders/collected/{{ order.id }}/" class="btn btn-sm btn-success">
+                <i class="bi bi-check2-all"></i> Mark as Collected
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info">No orders ready for pickup.</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Customer Registration{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h4 class="fw-bold mb-4"><i class="bi bi-person-plus"></i> Customer Registration</h4>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Full Name</label>
+                    <input type="text" name="full_name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Username</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Password</label>
+                    <input type="password" name="password1" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Confirm Password</label>
+                    <input type="password" name="password2" class="form-control" required>
+                </div>
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                <button type="submit" class="btn btn-primary w-100 py-2">Create Account</button>
+            </form>
+            <div class="text-center mt-3">
+                <a href="/login/">Already have an account? Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}{{ shop.name }} — Kadmat Grocery{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active">{{ shop.name }}</li>
+            </ol>
+        </nav>
+        <h4 class="fw-bold"><i class="bi bi-shop text-success"></i> {{ shop.name }}</h4>
+        <p class="text-muted"><i class="bi bi-geo-alt"></i> {{ shop.location }} &nbsp;|&nbsp; <i class="bi bi-telephone"></i> {{ shop.phone }}</p>
+    </div>
+</div>
+
+{% if categories %}
+    {% for category, products in categories.items %}
+    <div class="mb-4">
+        <h5 class="fw-bold border-bottom pb-2 text-success">{{ category }}</h5>
+        <div class="row g-3">
+            {% for product in products %}
+            <div class="col-md-4">
+                <div class="card h-100">
+                    {% if product.seller_product.base_product.image %}
+                    <img src="{{ product.seller_product.base_product.image.url }}" class="card-img-top" style="height:160px;object-fit:cover;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height:160px;">
+                        <i class="bi bi-basket text-muted" style="font-size:3rem;"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h6 class="fw-bold">{{ product.seller_product.base_product.name }}</h6>
+                        {% if product.seller_product.local_name %}
+                        <p class="text-muted small mb-1">{{ product.seller_product.local_name }}</p>
+                        {% endif %}
+                        <p class="text-muted small mb-2">{{ product.seller_product.base_product.category.name }}</p>
+                        <p class="fw-bold text-success mb-1">₹{{ product.price }}</p>
+                        <p class="text-muted small mb-3">{{ product.get_unit_display_name }}</p>
+                        <form method="post" action="/cart/add/">
+                            {% csrf_token %}
+                            <input type="hidden" name="variant_id" value="{{ product.id }}">
+                            <input type="hidden" name="shop_id" value="{{ shop.id }}">
+                            <div class="input-group mb-2">
+                                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control form-control-sm">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-cart-plus"></i> Add
+                                </button>
+                            </div>
+                            <p class="text-muted small">Stock: {{ product.stock }}</p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info">No products available in this shop yet.</div>
+{% endif %}
+{% endblock %}
